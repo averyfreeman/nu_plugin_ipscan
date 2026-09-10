@@ -166,6 +166,15 @@ pub fn run_backend(
         return Ok(Value::binary(output.stdout, span));
     }
 
+    if explicit_output_format(arguments).is_some_and(|format| format != "json") {
+        let text = std::str::from_utf8(&output.stdout).map_err(|error| {
+            LabeledError::new(format!("ipscan emitted invalid text output: {error}"))
+                .with_label("backend output", span)
+                .with_code("nu_plugin_ipscan::invalid_output")
+        })?;
+        return Ok(Value::string(text.to_owned(), span));
+    }
+
     parse_json_output(&output.stdout, span)
 }
 
@@ -173,10 +182,7 @@ pub fn run_backend(
 /// selected raw output or another output format. The standalone `ipscan` CLI
 /// uses `--output json` for the plugin transport.
 pub fn backend_arguments(arguments: &[String], raw: bool) -> Vec<String> {
-    let has_output = arguments.iter().any(|argument| {
-        argument == "-o" || argument == "--output" || argument.starts_with("--output=")
-    });
-    if raw || has_output {
+    if raw || explicit_output_format(arguments).is_some() {
         arguments.to_vec()
     } else {
         let mut result = Vec::with_capacity(arguments.len() + 2);
@@ -185,6 +191,24 @@ pub fn backend_arguments(arguments: &[String], raw: bool) -> Vec<String> {
         result.extend(arguments.iter().cloned());
         result
     }
+}
+
+/// Return the explicitly selected standalone output format, if present.
+fn explicit_output_format(arguments: &[String]) -> Option<&str> {
+    for (index, argument) in arguments.iter().enumerate() {
+        if argument == "-o" || argument == "--output" {
+            return Some(
+                arguments
+                    .get(index + 1)
+                    .map(String::as_str)
+                    .unwrap_or_default(),
+            );
+        }
+        if let Some(format) = argument.strip_prefix("--output=") {
+            return Some(format);
+        }
+    }
+    None
 }
 
 /// Convert the JSON emitted by ipscan into native Nu values.
@@ -309,5 +333,16 @@ mod tests {
     fn an_explicit_json_switch_is_not_duplicated() {
         let args = vec!["--output".to_owned(), "json".to_owned()];
         assert_eq!(backend_arguments(&args, false), args);
+    }
+
+    #[test]
+    fn an_explicit_text_format_is_not_replaced() {
+        let args = vec![
+            "--output".to_owned(),
+            "plain".to_owned(),
+            "--list".to_owned(),
+        ];
+        assert_eq!(backend_arguments(&args, false), args);
+        assert_eq!(explicit_output_format(&args), Some("plain"));
     }
 }
