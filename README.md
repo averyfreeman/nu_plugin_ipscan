@@ -71,10 +71,10 @@ wget -O ipscan https://github.com/averyfreeman/nu_plugin_ipscan/releases/downloa
 
 ### Install from sources
 
-If you have Rust installed, you can build and install `ipscan` from source using Cargo:
+If you have Rust installed, you can build and install the local `ipscan` crate:
 
 ```bash
-cargo install ipscan
+cargo install --path ipscan --locked
 ```
 
 Or clone the repository and build locally:
