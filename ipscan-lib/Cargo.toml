@@ -1,0 +1,22 @@
+[package]
+name = "ipscan-lib"
+description = "Library for performing local-network ARP discovery, powering ipscan"
+version = "0.15.1"
+readme = "../README.md"
+keywords = ["arp", "scan", "network", "security"]
+categories = ["network-programming"]
+
+license.workspace = true
+authors.workspace = true
+edition.workspace = true
+homepage.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+dns-lookup = { workspace = true }
+pnet_datalink = { workspace = true }
+csv = { workspace = true }
+ipnetwork = { workspace = true }
+pnet = { workspace = true }
+rand = { workspace = true }

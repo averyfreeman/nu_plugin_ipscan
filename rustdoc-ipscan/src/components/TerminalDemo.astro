@@ -1,0 +1,157 @@
+---
+type TerminalLine = {
+	kind: 'comment' | 'command' | 'output' | 'table';
+	text: string;
+};
+
+const lines: TerminalLine[] = [
+	{ kind: 'comment', text: '# Build and register the scanner plugin' },
+	{ kind: 'command', text: 'cargo install --path nu-plugin-ipscan --locked' },
+	{ kind: 'output', text: 'installed nu_plugin_ipscan' },
+	{ kind: 'command', text: 'plugin add ~/.cargo/bin/nu_plugin_ipscan' },
+	{ kind: 'output', text: 'added plugin ipscan' },
+	{ kind: 'command', text: 'plugin use ipscan' },
+	{ kind: 'output', text: 'loaded ipscan' },
+	{ kind: 'comment', text: '# Discover hosts on a local network' },
+	{ kind: 'command', text: 'ipscan --network 192.168.1.0/24 --numeric' },
+	{
+		kind: 'table',
+		text: [
+			'ipv4           mac                hostname      vendor',
+			'192.168.1.1    91:10:fb:30:06:04  router.home   Example Networks',
+			'192.168.1.11   45:2e:99:bc:22:b6  host-a.home',
+			'192.168.1.15   bc:03:c2:92:47:df  host-b.home   Example Devices',
+		].join('\n'),
+	},
+];
+
+const serializedLines = JSON.stringify(lines);
+---
+
+<div
+	class="net-terminal net-reveal"
+	data-terminal-demo
+	data-terminal-lines={serializedLines}
+>
+	<div class="net-terminal__bar">
+		<div class="net-terminal__identity">
+			<span class="net-terminal__dot" aria-hidden="true"></span>
+			<span>nu</span>
+		</div>
+		<div class="net-terminal__controls">
+			<span data-terminal-status aria-live="polite">auto demo</span>
+			<button type="button" data-terminal-replay aria-label="Replay terminal demo">
+				replay <span aria-hidden="true">↻</span>
+			</button>
+		</div>
+	</div>
+	<pre class="net-terminal__output" aria-label="nu_plugin_ipscan installation and discovery demo"><code data-terminal-output>{lines.map((line) => (
+		<span class={'terminal-line terminal-line--' + line.kind}>{line.text}</span>
+	))}</code></pre>
+	<div class="net-terminal__caption">sample output · structured, consistent, scriptable</div>
+</div>
+
+<script>
+	type TerminalLine = {
+		kind: 'comment' | 'command' | 'output' | 'table';
+		text: string;
+	};
+
+	const createLine = (line: TerminalLine, text = line.text) => {
+		const element = document.createElement('span');
+		element.className = 'terminal-line terminal-line--' + line.kind;
+		element.textContent = text;
+		return element;
+	};
+
+	const initializeTerminal = (root: Element) => {
+		const output = root.querySelector<HTMLElement>('[data-terminal-output]');
+		const replay = root.querySelector<HTMLButtonElement>('[data-terminal-replay]');
+		const status = root.querySelector<HTMLElement>('[data-terminal-status]');
+		if (!output || !replay || !status) return;
+
+		const lines = JSON.parse(root.getAttribute('data-terminal-lines') ?? '[]') as TerminalLine[];
+		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+		let timer = 0;
+		let hasPlayed = false;
+
+		const draw = (completed: number, current?: string) => {
+			output.replaceChildren();
+			lines.slice(0, completed).forEach((line) => output.append(createLine(line)));
+			if (current !== undefined && completed < lines.length) {
+				output.append(createLine(lines[completed], current));
+			}
+		};
+
+		const play = () => {
+			window.clearTimeout(timer);
+			if (reducedMotion.matches) {
+				draw(lines.length);
+				status.textContent = 'ready';
+				hasPlayed = true;
+				return;
+			}
+
+			status.textContent = 'playing';
+			hasPlayed = false;
+			let index = 0;
+			let cursor = 0;
+
+			const tick = () => {
+				if (index >= lines.length) {
+					status.textContent = 'ready';
+					hasPlayed = true;
+					return;
+				}
+
+				const line = lines[index];
+				const typeLine = line.kind === 'comment' || line.kind === 'command';
+				if (typeLine && cursor < line.text.length) {
+					cursor += 1;
+					draw(index, line.text.slice(0, cursor));
+					timer = window.setTimeout(tick, line.kind === 'command' ? 22 : 12);
+					return;
+				}
+
+				draw(index + 1);
+				index += 1;
+				cursor = 0;
+				timer = window.setTimeout(tick, line.kind === 'output' ? 80 : 180);
+			};
+
+			tick();
+		};
+
+		replay.addEventListener('click', play);
+		if (reducedMotion.matches || !('IntersectionObserver' in window)) {
+			draw(lines.length);
+			status.textContent = 'ready';
+			hasPlayed = true;
+		} else {
+			const observer = new IntersectionObserver(
+				(entries) => {
+					if (entries.some((entry) => entry.isIntersecting) && !hasPlayed) {
+						observer.disconnect();
+						play();
+					}
+				},
+				{ threshold: 0.2 },
+			);
+
+			observer.observe(root);
+		}
+
+		reducedMotion.addEventListener?.('change', () => {
+			if (reducedMotion.matches) {
+				window.clearTimeout(timer);
+				draw(lines.length);
+				status.textContent = 'ready';
+				hasPlayed = true;
+			} else if (!hasPlayed) {
+				play();
+			}
+		});
+	};
+
+	document.querySelectorAll('[data-terminal-demo]').forEach(initializeTerminal);
+</script>

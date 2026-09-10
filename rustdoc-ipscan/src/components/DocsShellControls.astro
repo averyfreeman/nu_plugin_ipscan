@@ -1,0 +1,85 @@
+---
+import { Icon } from '@astrojs/starlight/components';
+---
+
+<div class="net-doc-controls" data-net-doc-controls>
+	<button
+		class="net-shell-toggle net-shell-toggle--left"
+		type="button"
+		data-net-shell-toggle="left"
+		aria-expanded="false"
+		aria-label="Show navigation sidebar"
+		title="Show navigation sidebar"
+	>
+		<Icon name="bars" />
+	</button>
+	<button
+		class="net-shell-toggle net-shell-toggle--right"
+		type="button"
+		data-net-shell-toggle="right"
+		aria-expanded="false"
+		aria-label="Show table of contents"
+		title="Show table of contents"
+	>
+		<Icon name="bars" />
+	</button>
+</div>
+
+<script is:inline>
+	(() => {
+		const root = document.documentElement;
+		if (!root.hasAttribute('data-has-sidebar')) return;
+
+		root.setAttribute('data-net-doc-shell', '');
+		const leftToggle = document.querySelector('[data-net-shell-toggle="left"]');
+		const rightToggle = document.querySelector('[data-net-shell-toggle="right"]');
+		const getSidebar = () => document.querySelector('#starlight__sidebar');
+		const rightRail = document.querySelector('.right-sidebar-panel');
+		const desktopQuery = window.matchMedia('(min-width: 48rem)');
+
+		if (!leftToggle || !rightToggle) return;
+		if (rightRail) rightRail.id = 'starlight__right-sidebar';
+
+		const setRailState = (rail, open) => {
+			root.toggleAttribute(`data-net-${rail}-open`, open);
+			root.toggleAttribute(`data-net-${rail}-collapsed`, !open);
+			const toggle = rail === 'left' ? leftToggle : rightToggle;
+			toggle.setAttribute('aria-expanded', String(open));
+			toggle.setAttribute(
+				'aria-label',
+				`${open ? 'Hide' : 'Show'} ${rail === 'left' ? 'navigation sidebar' : 'table of contents'}`,
+			);
+			toggle.setAttribute('title', `${open ? 'Hide' : 'Show'} ${rail === 'left' ? 'navigation sidebar' : 'table of contents'}`);
+		};
+
+		const resetRails = () => {
+			setRailState('left', false);
+			setRailState('right', false);
+			const sidebar = getSidebar();
+			if (sidebar?.matches(':popover-open')) sidebar.hidePopover();
+			rightToggle.hidden = !desktopQuery.matches;
+		};
+
+		leftToggle.addEventListener('click', () => {
+			const sidebar = getSidebar();
+			if (!desktopQuery.matches && sidebar) {
+				if (sidebar.matches(':popover-open')) sidebar.hidePopover();
+				else sidebar.showPopover();
+				return;
+			}
+			setRailState('left', !root.hasAttribute('data-net-left-open'));
+		});
+
+		rightToggle.addEventListener('click', () => {
+			if (desktopQuery.matches) setRailState('right', !root.hasAttribute('data-net-right-open'));
+		});
+
+		getSidebar()?.addEventListener('toggle', () => {
+			const sidebar = getSidebar();
+			if (!desktopQuery.matches && sidebar) leftToggle.setAttribute('aria-expanded', String(sidebar.matches(':popover-open')));
+		});
+
+		desktopQuery.addEventListener('change', resetRails);
+		resetRails();
+	})();
+</script>

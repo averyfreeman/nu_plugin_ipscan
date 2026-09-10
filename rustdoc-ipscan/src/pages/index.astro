@@ -1,0 +1,180 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import TerminalDemo from '../components/TerminalDemo.astro';
+import RevealObserver from '../components/RevealObserver.astro';
+
+const frontmatter = {
+	title: 'nu_plugin_ipscan',
+	description: 'Fast local-network discovery with a Rust ARP scanner and structured Nushell output.',
+	template: 'splash',
+};
+
+const docsBase = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+const installHref = `${docsBase}guides/install/`;
+const useScanHref = `${docsBase}guides/use-ipscan/`;
+const outputHref = `${docsBase}reference/output/`;
+const apiHref = `${docsBase}api/`;
+---
+
+<StarlightPage frontmatter={frontmatter} hasSidebar={false} headings={[]}>
+<RevealObserver />
+
+<div class="net-home">
+  <section class="net-home__hero net-reveal">
+    <div class="net-home__hero-copy">
+      <p class="net-eyebrow">Rust · Ethernet · Nushell</p>
+      <h1>Local network discovery with <em>signal.</em></h1>
+      <p class="net-lede">A fast Rust ARP scanner with a Nushell plugin that turns interface inventories and host discoveries into values you can filter, join, and export.</p>
+      <div class="net-actions">
+        <a class="sl-link-button primary" href={installHref}>Install the plugin <span aria-hidden="true">→</span></a>
+        <a class="net-text-link" href={apiHref}>Browse Rustdoc <span aria-hidden="true">↗</span></a>
+      </div>
+      <div class="net-hero-meta" aria-label="Project metadata">
+        <span><strong>Linux</strong> raw Ethernet</span>
+        <span><strong>Nu</strong> 0.115.1</span>
+        <span><strong>MIT</strong> plugin adapter</span>
+      </div>
+    </div>
+    <div class="net-home__hero-aside">
+      <p>One scanner, two useful front ends.</p>
+      <p><code>ipscan</code> keeps a focused CLI while <code>nu_plugin_ipscan</code> makes its JSON output feel native in Nushell.</p>
+    </div>
+  </section>
+
+  <section class="net-section net-reveal" aria-labelledby="terminal-title">
+    <div class="net-section-heading">
+      <div>
+        <p class="net-eyebrow">Try it yourself</p>
+        <h2 id="terminal-title">A useful result, right away.</h2>
+      </div>
+      <p class="net-section-note">A small taste of the real plugin flow.</p>
+    </div>
+    <TerminalDemo />
+  </section>
+
+  <section class="net-section net-section--schema net-reveal" aria-labelledby="schema-title">
+    <div class="net-section-heading">
+      <div>
+        <p class="net-eyebrow">Current output surface</p>
+        <h2 id="schema-title">The fields that matter.</h2>
+      </div>
+      <p class="net-section-note">JSON becomes native Nushell records.</p>
+    </div>
+    <p class="net-section-intro">The scanner reports packet counters and discovered hosts, while <code>--list</code> provides a structured inventory for choosing an interface.</p>
+    <div class="net-schema-table-wrap">
+      <table class="net-schema-table">
+        <thead>
+          <tr><th>Record</th><th>Representative fields</th><th>Why it is useful</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>results</code></td><td>ipv4, mac, hostname, vendor</td><td>Discovered local hosts</td><td>stable</td></tr>
+          <tr><td><code>summary</code></td><td>packet_count, arp_count, duration_ms</td><td>Scan health and timing</td><td>stable</td></tr>
+          <tr><td><code>interfaces</code></td><td>name, index, mac, ips, is_up</td><td>Interface selection and inventory</td><td>stable</td></tr>
+          <tr><td><code>exports</code></td><td>JSON, YAML, CSV, plain</td><td>Shell pipelines and reports</td><td>available</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="net-section net-reveal" aria-labelledby="features-title">
+    <div class="net-section-heading">
+      <div>
+        <p class="net-eyebrow">Designed for practical discovery</p>
+        <h2 id="features-title">Keep the packet boundary <em>visible.</em></h2>
+      </div>
+    </div>
+    <div class="net-feature-grid">
+      <article class="net-feature-card">
+        <span class="net-feature-index">01</span>
+        <h3>Raw Ethernet and ARP</h3>
+        <p>Send and decode ARP frames directly through the selected interface instead of depending on a populated neighbour cache.</p>
+      </article>
+      <article class="net-feature-card">
+        <span class="net-feature-index">02</span>
+        <h3>Structured Nu values</h3>
+        <p>Filter vendors, select addresses, and export discoveries without re-parsing terminal-oriented tables.</p>
+      </article>
+      <article class="net-feature-card">
+        <span class="net-feature-index">03</span>
+        <h3>Focused scope</h3>
+        <p>Keep scanning behavior explicit: interface choice, timing, retries, VLANs, DNS, vendor lookup, and output format.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="net-section net-install net-reveal" aria-labelledby="install-title">
+    <div class="net-section-heading">
+      <div>
+        <p class="net-eyebrow">Installation</p>
+        <h2 id="install-title">Ready in a <em>few commands.</em></h2>
+      </div>
+      <p class="net-section-note">Works with the Nushell plugin system.</p>
+    </div>
+    <div class="net-install-grid">
+      <div>
+        <p class="net-section-intro">Build the plugin and standalone scanner, register the plugin, then grant the process the packet privileges your platform requires.</p>
+        <a class="net-text-link" href={installHref}>See the full installation guide <span aria-hidden="true">→</span></a>
+      </div>
+      <pre class="net-code-panel"><code>{'# Build both pieces\ncargo install --path nu-plugin-ipscan --locked\ncargo build --bin ipscan --locked\n\n# Register in Nushell\nplugin add ~/.cargo/bin/nu_plugin_ipscan\nplugin use ipscan'}</code></pre>
+    </div>
+  </section>
+
+  <section class="net-section net-reveal" aria-labelledby="examples-title">
+    <div class="net-section-heading">
+      <div>
+        <p class="net-eyebrow">Examples</p>
+        <h2 id="examples-title">Common <em>pipelines.</em></h2>
+      </div>
+      <p class="net-section-note">Records in, useful answers out.</p>
+    </div>
+    <div class="net-example-grid">
+      <article class="net-example-card">
+        <h3>Choose an interface</h3>
+        <p>Keep interfaces that are up and suitable for a scan.</p>
+        <pre class="net-code-panel"><code>{`ipscan --list | where is_up and not is_loopback | select name mac ips`}</code></pre>
+      </article>
+      <article class="net-example-card">
+        <h3>Scan a subnet</h3>
+        <p>Use numeric mode when reverse DNS would add noise.</p>
+        <pre class="net-code-panel"><code>{`ipscan --network 192.168.1.0/24 --numeric`}</code></pre>
+      </article>
+      <article class="net-example-card">
+        <h3>Find vendor matches</h3>
+        <p>Project the fields needed for an inventory report.</p>
+        <pre class="net-code-panel"><code>{`ipscan --network 192.168.1.0/24 --numeric | where vendor != '' | select ipv4 mac vendor`}</code></pre>
+      </article>
+      <article class="net-example-card">
+        <h3>Save machine output</h3>
+        <p>Keep structured results for a later report or join.</p>
+        <pre class="net-code-panel"><code>{`ipscan --network 192.168.1.0/24 --numeric | to json | save hosts.json`}</code></pre>
+      </article>
+    </div>
+  </section>
+
+  <section class="net-section net-doc-preview net-reveal" aria-labelledby="docs-title">
+    <div class="net-doc-preview__copy">
+      <p class="net-eyebrow">Documentation</p>
+      <h2 id="docs-title">Explore the <em>details.</em></h2>
+      <p>Learn the install flow, inspect the output schema, and browse the generated Rust API reference.</p>
+    </div>
+    <nav class="net-doc-preview__links" aria-label="Documentation links">
+      <a href={installHref}><span>01</span><strong>Installation</strong><small>Build and register</small><b aria-hidden="true">↗</b></a>
+      <a href={useScanHref}><span>02</span><strong>Use `ipscan`</strong><small>Discover local hosts</small><b aria-hidden="true">↗</b></a>
+      <a href={outputHref}><span>03</span><strong>Output schema</strong><small>Know the fields</small><b aria-hidden="true">↗</b></a>
+      <a href={apiHref}><span>04</span><strong>Rust API</strong><small>Generated reference</small><b aria-hidden="true">↗</b></a>
+    </nav>
+  </section>
+
+  <section class="net-cta net-reveal" aria-labelledby="cta-title">
+    <p class="net-eyebrow">Open source local-network tooling</p>
+    <h2 id="cta-title">Make your shell <em>see more.</em></h2>
+    <p>Read the plan, try the scanner, and turn local discovery into a repeatable pipeline.</p>
+    <a class="sl-link-button primary" href={installHref}>Get started <span aria-hidden="true">→</span></a>
+  </section>
+
+  <footer class="net-footer">
+    <span><strong>nu_plugin_ipscan</strong> · Built with Rust, pnet, and Nushell.</span>
+    <span><a href="https://github.com/averyfreeman/nu_plugin_ipscan">View on GitHub <span aria-hidden="true">↗</span></a></span>
+  </footer>
+</div>
+</StarlightPage>

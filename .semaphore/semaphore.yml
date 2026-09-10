@@ -1,0 +1,19 @@
+version: v1.0
+name: Rust
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu2004
+  containers:
+    - name: main
+      image: 'saluki/rust-ci:1.90'
+blocks:
+  - name: Test release
+    task:
+      jobs:
+        - name: Build & test
+          commands:
+            - checkout
+            - rustc --version
+            - cargo build --verbose
+            - cargo test --verbose

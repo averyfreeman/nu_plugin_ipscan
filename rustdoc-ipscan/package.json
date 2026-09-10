@@ -1,0 +1,25 @@
+{
+  "name": "nu-plugin-ipscan-docs",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "rustdoc": "node scripts/build-rustdoc.mjs",
+    "validate:examples": "nu scripts/validate-doc-examples.nu",
+    "predev": "npm run rustdoc",
+    "prestart": "npm run rustdoc",
+    "prebuild": "npm run rustdoc",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.42.0",
+    "astro": "^7.2.10",
+    "sharp": "^0.35.3"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}
