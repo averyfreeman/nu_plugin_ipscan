@@ -19,6 +19,7 @@ use std::process;
  * (macOS, BSD, etc.), the capability check is not applicable - permissions must
  * be granted at runtime (e.g., via sudo).
  */
+/// Performs the public `has_network_capability` operation.
 pub fn has_network_capability() -> bool {
     #[cfg(target_os = "linux")]
     {
@@ -39,6 +40,7 @@ pub fn has_network_capability() -> bool {
  * technical details. The goal is to present the most useful technical details
  * to pick the right network interface for scans.
  */
+/// Performs the public `show_interfaces` operation.
 pub fn show_interfaces(interfaces: &[NetworkInterface]) {
     let mut interface_count = 0;
     let mut ready_count = 0;
@@ -86,6 +88,7 @@ pub fn show_interfaces(interfaces: &[NetworkInterface]) {
 
 /// A stable, JSON-friendly view of one interface used by the Nushell plugin.
 #[derive(Debug, Serialize)]
+/// Describes the public `InterfaceSummary` type.
 pub struct InterfaceSummary {
     /// Interface name reported by pnet.
     pub name: String,
@@ -126,6 +129,7 @@ pub fn export_interfaces_json(interfaces: &[NetworkInterface]) -> String {
     })
 }
 
+/// Performs the public `print_ascii_packet` operation.
 pub fn print_ascii_packet() {
     println!();
     println!(" 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 ");
@@ -154,6 +158,7 @@ pub fn print_ascii_packet() {
  * Display the scan results on stdout with a table. The 'final_result' vector
  * contains all items that will be displayed.
  */
+/// Performs the public `display_scan_results` operation.
 pub fn display_scan_results(
     response_summary: ResponseSummary,
     mut target_details: Vec<TargetDetails>,
@@ -298,6 +303,7 @@ fn get_serializable_result(
  * Export the scan results as a JSON string with response details (timings, ...)
  * and ARP results from the local network.
  */
+/// Performs the public `export_to_json` operation.
 pub fn export_to_json(
     response_summary: ResponseSummary,
     mut target_details: Vec<TargetDetails>,
@@ -316,6 +322,7 @@ pub fn export_to_json(
  * Export the scan results as a YAML string with response details (timings, ...)
  * and ARP results from the local network.
  */
+/// Performs the public `export_to_yaml` operation.
 pub fn export_to_yaml(
     response_summary: ResponseSummary,
     mut target_details: Vec<TargetDetails>,
@@ -334,6 +341,7 @@ pub fn export_to_yaml(
  * Export the scan results as a CSV string with response details (timings, ...)
  * and ARP results from the local network.
  */
+/// Performs the public `export_to_csv` operation.
 pub fn export_to_csv(
     response_summary: ResponseSummary,
     mut target_details: Vec<TargetDetails>,

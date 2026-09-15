@@ -1,3 +1,5 @@
+//! Network-interface selection, ARP packet exchange, and scan timing.
+
 use std::collections::HashMap;
 use std::convert::TryInto;
 use std::io::ErrorKind::TimedOut;
@@ -34,6 +36,7 @@ const ETHERNET_VLAN_PACKET_SIZE: usize = 46;
  * Contains scan estimation records. This will be computed before the scan
  * starts and should give insights about the scan.
  */
+/// Describes the public `ScanEstimation` type.
 pub struct ScanEstimation {
     /// Estimated delay between requests, in milliseconds.
     pub interval_ms: u64,
@@ -49,6 +52,7 @@ pub struct ScanEstimation {
  * Gives high-level details about the scan response. This may include Ethernet
  * details (packet count, size, ...) and other technical network aspects.
  */
+/// Describes the public `ResponseSummary` type.
 pub struct ResponseSummary {
     /// Number of link-layer packets observed.
     pub packet_count: usize,
@@ -63,6 +67,7 @@ pub struct ResponseSummary {
  * address and a linked MAC address. Hostnames are optional since some hosts
  * does not respond to the resolve call (or the numeric mode may be enabled).
  */
+/// Describes the public `TargetDetails` type.
 pub struct TargetDetails {
     /// IPv4 address reported by the responding host.
     pub ipv4: Ipv4Addr,
@@ -79,6 +84,7 @@ pub struct TargetDetails {
  * interfaces. This configuration will be used in the scan process to target a
  * specific network on a network interfaces.
  */
+/// Performs the public `compute_network_configuration` operation.
 pub fn compute_network_configuration<'a>(
     interfaces: &'a [NetworkInterface],
     scan_options: &'a Arc<ScanOptions>,
@@ -145,6 +151,7 @@ fn find_interface_by_index(
  * estimation of the scan impact (timing, bandwidth, ...). Keep in mind that
  * this is only an estimation, real results may vary based on the network.
  */
+/// Performs the public `compute_scan_estimation` operation.
 pub fn compute_scan_estimation(host_count: u128, options: &Arc<ScanOptions>) -> ScanEstimation {
     let timeout: u128 = options.timeout_ms.into();
     let packet_size: u128 = match options.has_vlan() {
@@ -210,6 +217,7 @@ pub fn compute_scan_estimation(host_count: u128, options: &Arc<ScanOptions>) -> 
  * interface and a target IPv4 address. The ARP request will be broadcasted to
  * the whole local network with the first valid IPv4 address on the interface.
  */
+/// Performs the public `send_arp_request` operation.
 pub fn send_arp_request(
     tx: &mut Box<dyn DataLinkSender>,
     interface: &NetworkInterface,
@@ -293,6 +301,7 @@ pub fn send_arp_request(
  * low-memory approach. This iterator was crafted to allow iteration over huge
  * network ranges (192.168.0.0/16) without consuming excessive memory.
  */
+/// Describes the public `NetworkIterator` type.
 pub struct NetworkIterator {
     current_iterator: Option<ipnetwork::IpNetworkIterator>,
     networks: Vec<IpNetwork>,
@@ -388,6 +397,7 @@ impl Iterator for NetworkIterator {
  * ARP requests. If the 'forced_source_ipv4' parameter is set, it will take
  * the priority over the network interface address.
  */
+/// Performs the public `find_source_ip` operation.
 pub fn find_source_ip(
     network_interface: &NetworkInterface,
     forced_source_ipv4: Option<Ipv4Addr>,
@@ -416,6 +426,7 @@ pub fn find_source_ip(
  * on the next received frame. Therefore, the receiver should have been
  * configured to stop at certain intervals (500ms for example).
  */
+/// Performs the public `receive_arp_responses` operation.
 pub fn receive_arp_responses(
     rx: &mut Box<dyn DataLinkReceiver>,
     options: Arc<ScanOptions>,
