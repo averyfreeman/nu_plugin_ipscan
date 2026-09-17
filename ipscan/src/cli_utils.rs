@@ -1,4 +1,5 @@
 use ansi_term::Color::{Green, Red};
+#[cfg(target_os = "linux")]
 use caps::{CapSet, Capability, has_cap};
 use ipscan_lib::network::{ResponseSummary, TargetDetails};
 use ipscan_lib::scan_options::ScanOptions;
