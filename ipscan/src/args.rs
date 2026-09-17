@@ -47,6 +47,7 @@ const EXAMPLES_HELP: &str = "EXAMPLES:
  * This function groups together all exposed CLI arguments to the end-users
  * with clap. Other CLI details (version, ...) should be grouped there as well.
  */
+/// Performs the public `build_args` operation.
 pub fn build_args() -> Command {
     Command::new("ipscan")
         .version(CLI_VERSION)
@@ -310,6 +311,7 @@ fn compute_scan_timing(matches: &ArgMatches, profile: &ProfileType) -> ScanTimin
  * as the network level, the display details and more. The scan options reflect
  * user requests for the CLI and should not be mutated.
  */
+/// Performs the public `build_scan_options_from_args` operation.
 pub fn build_scan_options_from_args(matches: &ArgMatches) -> Arc<ScanOptions> {
     let profile = match matches.get_one::<String>("profile") {
         Some(output_request) => match output_request.as_ref() {

@@ -1,8 +1,11 @@
+//! Human-friendly scan timing parsing and formatting.
+
 /**
  * Parse a given time string into milliseconds. This can be used to convert a
  * string such as '20ms', '10s' or '1h' into adequate milliseconds. Without
  * suffix, the default behavior is to parse into milliseconds.
  */
+/// Performs the public `parse_to_milliseconds` operation.
 pub fn parse_to_milliseconds(time_arg: &str) -> Result<u64, &str> {
     let len = time_arg.len();
 
@@ -48,6 +51,7 @@ pub fn parse_to_milliseconds(time_arg: &str) -> Result<u64, &str> {
  * Format milliseconds to a human-readable string. This will of course give an
  * approximation, but will be readable.
  */
+/// Performs the public `format_milliseconds` operation.
 pub fn format_milliseconds(milliseconds: u128) -> String {
     if milliseconds < 1000 {
         return format!("{}ms", milliseconds);

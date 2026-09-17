@@ -1,8 +1,9 @@
+//! Shared interface selection, scan summaries, and network-size helpers.
+
 use std::process;
 use std::sync::Arc;
 
 use crate::scan_options::ScanOptions;
-#[cfg(target_os = "linux")]
 use ipnetwork::{IpNetwork, NetworkSize};
 use pnet_datalink::NetworkInterface;
 
@@ -10,6 +11,7 @@ use pnet_datalink::NetworkInterface;
  * Find a default network interface for scans, based on the operating system
  * priority and some interface technical details.
  */
+/// Performs the public `select_default_interface` operation.
 pub fn select_default_interface(interfaces: &[NetworkInterface]) -> Option<NetworkInterface> {
     let default_interface = interfaces.iter().find(|interface| {
         if interface.mac.is_none() {
@@ -35,6 +37,7 @@ pub fn select_default_interface(interfaces: &[NetworkInterface]) -> Option<Netwo
  * Display scan settings before launching an ARP scan. This includes network
  * details (IP range, interface, ...) and timing information.
  */
+/// Performs the public `display_prescan_details` operation.
 pub fn display_prescan_details(
     ip_networks: &[&IpNetwork],
     selected_interface: &NetworkInterface,
@@ -74,6 +77,7 @@ pub fn display_prescan_details(
  * Computes multiple IPv4 networks total size, IPv6 network are not being
  * supported by this function.
  */
+/// Performs the public `compute_network_size` operation.
 pub fn compute_network_size(ip_networks: &[&IpNetwork]) -> u128 {
     ip_networks.iter().fold(0u128, |total_size, ip_network| {
         let network_size: u128 = match ip_network.size() {
